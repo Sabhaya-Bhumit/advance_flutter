@@ -1,64 +1,62 @@
-import 'dart:developer';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:home_service_app/global.dart';
-import 'package:home_service_app/helper/qoute_db.dart';
-import 'package:home_service_app/helper/quote_api.dart';
-import 'package:home_service_app/modal/quote_modal.dart';
-import 'package:home_service_app/screen/detai_page.dart';
-import 'package:home_service_app/screen/image_detail_page.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:home_service_app/helper/firebase_auth_helper.dart';
+import 'package:home_service_app/views/screens/admin_all_pages/Service_Update.dart';
+import 'package:home_service_app/views/screens/admin_all_pages/admin_page.dart';
+import 'package:home_service_app/views/screens/admin_all_pages/employee_add.dart';
+import 'package:home_service_app/views/screens/admin_all_pages/service_add.dart';
+import 'package:home_service_app/views/screens/intro_and_spelsh_screen/about_us_page.dart';
+import 'package:home_service_app/views/screens/intro_and_spelsh_screen/contact_us_page.dart';
+import 'package:home_service_app/views/screens/intro_and_spelsh_screen/intro_page.dart';
+import 'package:home_service_app/views/screens/intro_and_spelsh_screen/splesh_screen.dart';
+import 'package:home_service_app/views/screens/login_and_signUp/SignUp_page.dart';
+import 'package:home_service_app/views/screens/login_and_signUp/login_page.dart';
+import 'package:home_service_app/views/screens/user_all_pages/home.dart';
+import 'package:home_service_app/views/screens/user_all_pages/worker_detail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'screen/home.dart';
-
-bool connection = true;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  SharedPreferences prep = await SharedPreferences.getInstance();
+  await Firebase.initializeApp();
 
-  connection = await InternetConnectionChecker().hasConnection;
+  SharedPreferences pres = await SharedPreferences.getInstance();
+  global.remember = pres.getBool('remember') ?? false;
 
-  log(connection.toString(), name: "Connection");
-  global.isData = prep.getBool('isData') ?? false;
-  prep.setBool('isData', global.isData);
+  bool istrue = pres.getBool('isskips') ?? false;
+  pres.setBool('isskips', istrue);
+  bool admin = false;
+  add() async {
+    User? user = await FirebaseAuthHelper.firebaseAuthHelper.currentUser();
 
-  if (connection == true) {
-    await QuoteDatabaseHelper.quoteDatabaseHelper.deleteAllData();
-    // await ImageDatabaseHelper.imageDatabaseHelper.deleteAllData();
-
-    List<Quotes>? allQuotes =
-        await QuotesAPIHelper.quotesAPIHelper.fetchQuotes();
-    // List<myImages>? allImages = await ImageAPIHelper.imageAPIHelper.fetchImages();
-
-    await QuoteDatabaseHelper.quoteDatabaseHelper
-        .insertData(allQuotes: allQuotes);
-    // await ImageDatabaseHelper.imageDatabaseHelper.insertData(allImages: allImages);
-  } else {
-    List<Quotes> quotes =
-        await QuoteDatabaseHelper.quoteDatabaseHelper.fetchAllData();
-    // List<myImages> images = await ImageDatabaseHelper.imageDatabaseHelper.fetchAllData();
-
-    // log(images.toString(),name: "Images");
-    log(quotes.toString(), name: "Quotes");
-  }
-
-  List<String> quotes = [];
-  quoteData() async {
-    List<Quotes> data =
-        await QuoteDatabaseHelper.quoteDatabaseHelper.fetchAllData();
-    for (int i = 0; i < data.length; i++) {
-      global.quotes.add(data[i].quote);
+    user?.uid;
+    if (user?.uid == "h9laiHfTPuXWqwz99IITTD51Z0l2") {
+      return true;
+    } else {
+      return false;
     }
   }
 
+  await pres.setBool('remember', global.remember);
   runApp(
     MaterialApp(
+      theme: ThemeData(colorScheme: ColorScheme.fromSwatch().copyWith()),
       debugShowCheckedModeBanner: false,
+      initialRoute: (istrue == false) ? 'intro' : 'splesh_screen',
       routes: {
         '/': (context) => home(),
-        'detail_Page': (context) => detail_page(),
-        'image_detail_page': (context) => image_detail_page(),
+        'login_page': (context) => login_page(),
+        'SignUp_page': (context) => SignUp_page(),
+        'intro': (context) => intro(),
+        'admin_page': (context) => admin_page(),
+        'Service_Update': (context) => Service_Update(),
+        'Service_Add': (context) => Service_Add(),
+        'employee_add': (context) => employee_add(),
+        'worker_detail': (context) => worker_detail(),
+        'AboutUs_Page': (context) => AboutUs_Page(),
+        'ContactUs_Page': (context) => ContactUs_Page(),
+        'splesh_screen': (context) => splesh_screen(),
       },
     ),
   );

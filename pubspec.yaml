@@ -49,6 +49,12 @@ dependencies:
   share_plus:
   image_gallery_saver: ^1.7.1
   permission_handler: ^10.0.0
+  firebase_auth:
+  firebase_core:
+  cloud_firestore:
+  google_sign_in:
+  flutter_image_compress:
+  url_launcher:
 
 dev_dependencies:
   flutter_test:
